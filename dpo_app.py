@@ -10,7 +10,7 @@ except ModuleNotFoundError:
     raise SystemExit
 
 # ✅ Load the fine-tuned LoRA model and tokenizer
-model_path = "./model"
+model_path = "./fine_tuned_model"
 map_location = "cuda" if torch.cuda.is_available() else "cpu"
 
 # ✅ Check if adapter_config.json exists
@@ -23,7 +23,13 @@ if not os.path.exists(adapter_config_path):
 config = PeftConfig.from_pretrained(model_path)
 
 # Load model with LoRA
-model = PeftModel.from_pretrained(model_path)
+from transformers import AutoModelForCausalLM
+
+# Load base model
+base_model = AutoModelForCausalLM.from_pretrained("gpt2")
+
+# Load LoRA model
+model = PeftModel.from_pretrained(base_model, model_path)
 model.to(map_location)
 
 # Load tokenizer
